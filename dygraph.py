@@ -10,7 +10,7 @@ dygrap_data |
             |_______file2.csv
 '''
 
-import os
+import os, shutil
 def head():
     return """
     <head>
@@ -36,44 +36,61 @@ def create_div(element_id):
     <div id={0} style="width: 50% !important; margin-top: 50px; margin-bottom: 50px;"></div>'''.format(element_id)
 
 
-def format_javascript(csv, element_id):
+def format_javascript(csv, element_id, folder):
     # given a csv and an element id create javascript
     obj_name = element_id.replace('/','')
-    # return ''' {0}jObject = new Dygraph(document.getElementById('{1}'), "{2}", { {rollPeriod: 7, showRoller: true}});'''.format(obj_name, element_id,csv)
+    absolute_csv_location = os.path.join(folder, csv)
+    common_path= os.path.commonprefix([os.getcwd(), absolute_csv_location]) # "{}\{}".format(folder, csv)
+    csv_location = absolute_csv_location.replace(common_path, '')
+    print(csv_location)
     return ''' %sObject = new Dygraph(document.getElementById('%s'), "%s",  {rollPeriod: 7, showRoller: true});
-    ''' %(obj_name, element_id, csv)
+    ''' %(obj_name, element_id, csv_location.replace('\\', '/'))
 
 
-def create_graph(csv, value):
+def create_graph(csv, value, folder=None):
     # given a csv return two items a div and the javascript part
     div_id = "{1}{0}".format(str(value), str(csv).replace('.csv', ''))
     html = create_div(div_id)
-    javascript_part = format_javascript(csv, div_id)
+    javascript_part = format_javascript(csv, div_id, folder)
     return html, javascript_part
 
 
-def create_graphs(csv_s):
+def create_graphs(csv_s, folder=None):
     # given a list of csvs create a list of tuples [(div),(javascript)]
     if isinstance(csv_s, str):
         return create_graph(csv_s, 1)
 
     div_parts = javascript_parts = ''
     for value, csv_file in enumerate(csv_s):
-        div_part, javascript_part = create_graph(csv_file, value)
+        div_part, javascript_part = create_graph(csv_file, value, folder)
         div_parts += div_part
         javascript_parts += javascript_part
     return div_parts, javascript_parts
 
 
-def construct_page(csv_s, output_file_name):
+def construct_page(csv_s, output_file_name, folder=None):
     # give a csv(or list of csvs) and output filename
     # this will create a html file in the current working directory
     header_str = head()
-    divs, scripts = create_graphs(csv_s)
+    divs, scripts = create_graphs(csv_s, folder)
+    print(scripts)
     body_str = body(divs, scripts)
     whole_thing = '<html>' + header_str + body_str + '</html>'
     with open(output_file_name, 'w+') as html_file:
+
         html_file.write(whole_thing)
+
+
+def copyFile(src, dest):
+    try:
+        return shutil.copy(src, dest)
+    # eg. src and dest are the same file
+    except shutil.Error as e:
+        print('Error: %s' % e)
+    # eg. source or destination doesn't exist
+    except IOError as e:
+        print('Error: %s' % e.strerror)
+    print('Source: {!s} , Destination: {!s}'.format(src, dest))
 
 
 def is_valid_file(parser, arg):
@@ -97,9 +114,10 @@ def get_parser():
 if __name__ == '__main__':
     args = get_parser().parse_args()
     paths = []
-    print(dir(args))
-    for file in os.listdir(args.usr_folder):
-        print(paths)
+    usr_folder = args.usr_folder
+
+    for file in os.listdir(usr_folder):
         if str(file).endswith('csv'):
             paths.append(file)
-    construct_page(paths, os.path.join(args.usr_folder,'index.html'))
+
+    construct_page(paths, 'index.html', usr_folder)
