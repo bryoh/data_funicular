@@ -2,15 +2,11 @@
 Given a list of csv files, plots each csv file on a web page
 you need to have dygraph libraries in a folder nameed dygraph
 
-dygraph-----|
-            |_______dygraph.css
-            |_______dygraph.min.js
-dygrap_data |
-            |_______file1.csv
-            |_______file2.csv
 '''
 
-import os, shutil
+import os, shutil, time
+import fmt_csvs_dates
+
 def head():
     return """
     <head>
@@ -33,7 +29,7 @@ def create_div(element_id):
     # given an element id create div
     return '''
     <h2>{0}</h2>
-    <div id={0} style="width: 50% !important; margin-top: 50px; margin-bottom: 50px;"></div>'''.format(element_id)
+    <div id={0} style="width: 90% !important; margin-top: 20px; margin-bottom: 20px;"></div>'''.format(element_id)
 
 
 def format_javascript(csv, element_id, folder):
@@ -43,8 +39,7 @@ def format_javascript(csv, element_id, folder):
     common_path= os.path.commonprefix([os.getcwd(), absolute_csv_location]) # "{}\{}".format(folder, csv)
     csv_location = absolute_csv_location.replace(common_path, '')
     print(csv_location)
-    return ''' %sObject = new Dygraph(document.getElementById('%s'), "%s",  {rollPeriod: 7, showRoller: true});
-    ''' %(obj_name, element_id, csv_location.replace('\\', '/'))
+    return ''' {0}Object = new Dygraph(document.getElementById('{1}'), "{2}",  {{showRoller: true, title: '{0}' }});'''.format(obj_name, element_id, csv_location.replace('\\', '/'))
 
 
 def create_graph(csv, value, folder=None):
@@ -81,7 +76,7 @@ def construct_page(csv_s, output_file_name, folder=None):
         html_file.write(whole_thing)
 
 
-def copyFile(src, dest):
+def copy_file(src, dest):
     try:
         return shutil.copy(src, dest)
     # eg. src and dest are the same file
@@ -89,7 +84,7 @@ def copyFile(src, dest):
         print('Error: %s' % e)
     # eg. source or destination doesn't exist
     except IOError as e:
-        print('Error: %s' % e.strerror)
+        print('Copy Error: %s' % e.strerror)
     print('Source: {!s} , Destination: {!s}'.format(src, dest))
 
 
@@ -114,10 +109,20 @@ def get_parser():
 if __name__ == '__main__':
     args = get_parser().parse_args()
     paths = []
+
     usr_folder = args.usr_folder
+    processing_folder = 'processing/'
+    destination_folder = 'output_data/'
 
-    for file in os.listdir(usr_folder):
-        if str(file).endswith('csv'):
-            paths.append(file)
+    for file_name in os.listdir(usr_folder):
+        if str(file_name).endswith('.csv'):
+            copy_file(os.path.join(usr_folder,file_name), processing_folder)
 
-    construct_page(paths, 'index.html', usr_folder)
+    for file_name in os.listdir(processing_folder):
+        if str(file_name).endswith('csv'):
+            paths.append(file_name)
+            new_csv_list = fmt_csvs_dates.read_csv(os.path.join(processing_folder, file_name))
+
+            fmt_csvs_dates.write_csv(new_csv_list, os.path.join(destination_folder, file_name))
+
+    construct_page(paths, 'index.html', destination_folder)
