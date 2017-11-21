@@ -26,7 +26,7 @@ def read_csv(file, begin_date=None, time_fmt='%H:%M:%S', date_fmt='%Y%M%d', time
         var_date = datetime.datetime.now()
     yr, m, d = var_date.year, var_date.month, var_date.day
 
-    with open(file, 'r+') as rfile:
+    with open(file, 'r') as rfile:
         reader = csv.reader(rfile)
         ret.append(next(reader, None))
         ret.extend(perf_tools.add_date(reader, time_fmt, d, m, yr, time_regex))
