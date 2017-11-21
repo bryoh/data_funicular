@@ -44,11 +44,12 @@ def str_to_date_obj(str, fmt=None):
 def try_regex(pattern, string):
     ret =None
     pat = pattern.replace('\\d', '\d')  # not necessary but ...
-    my_string = string
+    my_string = "".join(str(string))
     try:
         ret = re.findall(pat, my_string )[0]
     except Exception as e:
-        print('EXCEPTION: "{}" found on {}'.format(e, string))
+        pass
+        #print('EXCEPTION: "{}" found on {}'.format(e, string))
     return ret
 
 
@@ -65,14 +66,15 @@ def add_date(list_of_str, time_fmt='%H:%M:%S', d=None, m=None, yr=None, time_reg
     d = now.day if d is None else d
     m = now.day if m is None else m
     yr = now.year if yr is None else yr
-    time_regex = r'\d{2}:\d{2}:\d{2}' if time_regex is None else time_regex
+    time_regex = r'(\d{2}:\d{2})' if time_regex is None else time_regex
+    #time_regex = r'\d{2}:\d{2}:\d{2}' if time_regex is None else time_regex
 
     current_date = datetime.datetime(yr, m, d)
     past = current_date  # Both equal since there is no previous
     for i in list(list_of_str):
         regs = try_regex(time_regex, "".join(chain(*i)))
         if regs is None:
-            print('Skipping since not time object is found in line: {!s}'.format(str(i)))
+            #print('Skipping since not time object is found in line: {!s}'.format(str(i)))
             continue
 
         i_obj = datetime.datetime.strptime(regs, time_fmt).time()
