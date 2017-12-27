@@ -2,14 +2,21 @@
 Given a list of csv files, plots each csv file on a web page
 you need to have dygraph libraries in a folder nameed dygraph
 
+run
+python -m SimpleHTTPServer
+
+to serve on local host
 '''
 
 import os, shutil, time
 import fmt_csvs_dates
+import perf_tools
 
 def head():
     return """
+    <!DOCTYPE html>
     <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9">
     <script type='text/javascript'src="dygraph/dygraph.min.js"></script><link rel='stylesheet' src='dygraph/dygraph.css'/>
     </head>
     """
@@ -18,10 +25,11 @@ def head():
 def body(divs, scripts):
     # scripts need to the bottom of the page in order to speed up rendering
     return """
-    <body>{} 
-    <script>
-    {}
-    </script>
+    <body>
+        <div>
+            {}
+        </div> 
+        <script>{}</script>
     </body>""".format(divs, scripts)
 
 
@@ -39,7 +47,7 @@ def format_javascript(csv, element_id, folder):
     common_path= os.path.commonprefix([os.getcwd(), absolute_csv_location]) # "{}\{}".format(folder, csv)
     csv_location = absolute_csv_location.replace(common_path, '')
     print(csv_location)
-    return ''' {0}Object = new Dygraph(document.getElementById('{1}'), "{2}",  {{showRoller: true, title: '{0}' }});'''.format(obj_name, element_id, csv_location.replace('\\', '/'))
+    return ''' {0}Object = new Dygraph(document.getElementById('{1}'), "{2}",  {{titleHeight: 32 }});'''.format(obj_name, element_id, csv_location.replace('\\', '/'))
 
 
 def create_graph(csv, value, folder=None):
@@ -113,6 +121,10 @@ if __name__ == '__main__':
     usr_folder = args.usr_folder
     processing_folder = 'processing/'
     destination_folder = 'output_data/'
+    #shutil.rmtree(processing_folder)
+    #shutil.rmtree(destination_folder)
+    perf_tools.create_folder(processing_folder)
+    perf_tools.create_folder(destination_folder)
 
     for file_name in os.listdir(usr_folder):
         if str(file_name).endswith('.csv'):
