@@ -1,35 +1,30 @@
 #!/usr/bin/env python
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
-
-# HTTPRequestHandler class
-class testHTTPServer_RequestHandler(BaseHTTPRequestHandler):
-
-  # GET
-  def do_GET(self):
-        # Send response status code
-        self.send_response(200)
-
-        # Send headers
-        self.send_header('Content-type','text/html')
-        self.end_headers()
-
-        # Send message back to client
-        message = "Hello world!"
-        # Write content as utf-8 data
-        self.wfile.write(bytes(message, "utf8"))
-        return
-
-def run():
-  print('starting server...')
-
-  # Server settings
-  # Choose port 8080, for port 80, which is normally used for a http server, you need root access
-  server_address = ('127.0.0.1', 8000)
-  httpd = HTTPServer(server_address, testHTTPServer_RequestHandler)
-  print('running server...')
-  httpd.serve_forever()
-  return server_address
+import threading
+import webbrowser
+from wsgiref.simple_server import make_server
 
 
-run()
+class ServerThread(threading.Thread):
+    def __init__(self, port):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        srv = make_server('', port, application)
+        srv.serve_forever()
+
+
+def application(environ, start_response):
+    start_response("200 OK", [("Content-type", "text/html")])
+
+    with open('index.html', 'r+') as html_file:
+        return [line.encode("utf-8") for line in html_file.readlines()]
+
+
+if '__main__'==__name__:
+    url = 'http://localhost'
+    port = 8000
+    ServerThread(port).start()
+    url_n_port = "{}:{}/".format(url,str(port))
+    print(url_n_port)
+    webbrowser.open_new_tab(url=url_n_port)
