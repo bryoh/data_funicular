@@ -64,7 +64,7 @@ def add_date(list_of_str, time_fmt='%H:%M:%S', d=None, m=None, yr=None, time_reg
     list_obj = []
     now = datetime.datetime.now()
     d = now.day if d is None else d
-    m = now.day if m is None else m
+    m = now.month if m is None else m
     yr = now.year if yr is None else yr
     time_regex = r'(\d{2}:\d{2})' if time_regex is None else time_regex
     #time_regex = r'\d{2}:\d{2}:\d{2}' if time_regex is None else time_regex
