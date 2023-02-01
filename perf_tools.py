@@ -54,9 +54,8 @@ def try_regex(pattern, string):
 
 
 def day_has_passed(past, present):
-    full_day = 86400
     hr_val = past.hour > present.hour
-    day_diff = (present - past).total_seconds()/full_day >= 1
+    day_diff = (present - past).total_seconds() >= 86400
     return hr_val or day_diff
 
 

@@ -47,4 +47,4 @@ if __name__ == '__main__':
     a = get_all_constraints()
     a.sort(key = lambda x: str(x.date_obj.minute))  # sort by minute
     for i in a:
-        print('{}, {}, {}'.format(i.date_str, i.constraint, i.whole_msg))
+        print(f'{i.date_str}, {i.constraint}, {i.whole_msg}')

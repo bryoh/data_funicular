@@ -78,7 +78,7 @@ def construct_page(csv_s, output_file_name, folder=None):
     divs, scripts = create_graphs(csv_s, folder)
     print(scripts)
     body_str = body(divs, scripts)
-    whole_thing = '<html>' + header_str + body_str + '</html>'
+    whole_thing = f'<html>{header_str}{body_str}</html>'
     with open(output_file_name, 'w+') as html_file:
 
         html_file.write(whole_thing)
@@ -87,12 +87,10 @@ def construct_page(csv_s, output_file_name, folder=None):
 def copy_file(src, dest):
     try:
         return shutil.copy(src, dest)
-    # eg. src and dest are the same file
     except shutil.Error as e:
-        print('Error: %s' % e)
-    # eg. source or destination doesn't exist
+        print(f'Error: {e}')
     except IOError as e:
-        print('Copy Error: %s' % e.strerror)
+        print(f'Copy Error: {e.strerror}')
     print('Source: {!s} , Destination: {!s}'.format(src, dest))
 
 
@@ -100,7 +98,7 @@ def is_valid_file(parser, arg):
     """ Check if arg is a valid file that already exists on the file system. """
     arg = os.path.abspath(arg)
     if not os.path.exists(arg):
-        parser.error("The file %s does not exist!" % arg)
+        parser.error(f"The file {arg} does not exist!")
     else:
         return arg
 
