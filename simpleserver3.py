@@ -21,10 +21,10 @@ def application(environ, start_response):
         return [line.encode("utf-8") for line in html_file.readlines()]
 
 
-if '__main__'==__name__:
+if __name__ == '__main__':
     url = 'http://localhost'
     port = 8000
     ServerThread(port).start()
-    url_n_port = "{}:{}/".format(url,str(port))
+    url_n_port = f"{url}:{port}/"
     print(url_n_port)
     webbrowser.open_new_tab(url=url_n_port)
